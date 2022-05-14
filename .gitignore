@@ -2,3 +2,4 @@ build/
 CMakeFiles/
 lib/
 CMakeCache.txt
+.vscode
