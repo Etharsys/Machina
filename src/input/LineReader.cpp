@@ -18,8 +18,7 @@ bool LineReader::skip()
     }
     if (_line.at(0) == ':')
     {
-        error("Impossible caractere ':'" + _line);
-        return true;
+        throw InputException("Invalid caractere ':'" + _line);
     }
     infos("Reading line : " + _line);
     return false;
@@ -45,11 +44,11 @@ void LineReader::parse()
     switch(tokens.size())
     {
         default: 
-            throw "Illegal state"; break;
+            throw InputException("Impossible situation");
         case 1: 
             break;
         case 2: 
-            if (tokens.at(1) == "") throw "Illegal line"; 
+            if (tokens.at(1) == "") throw InputException("Arguments needed");
             tokens = split(tokens.at(1), ",");
             for (u_int i = 0; i < tokens.size(); i++)
             {
