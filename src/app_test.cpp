@@ -2,7 +2,7 @@
 
 #include "logger.hpp"
 #include "FileReader.hpp"
-#include "InputException.hpp"
+#include "ReaderException.hpp"
 
 void parseArgs(int argc, char const* argv[])
 {
@@ -28,14 +28,12 @@ int main(int argc, char const *argv[])
     FileReader reader { "test" };
     reader.open();
 
-    try 
-    {
+    try {
         for(MachinaExpression v : reader.read())
         {
             std::cout << v << std::endl;
         }
-    } catch (InputException& e) 
-    {
+    } catch (ReaderException& e) {
         error(e.what());
     }
     

@@ -4,18 +4,18 @@
 
 #include "logger.hpp"
 
-class InputException : public std::exception
+class ReaderException : public std::exception
 {
     private:
         std::string _message;
 
     public:
-        InputException()
+        ReaderException()
         {
             _message = "";
         }
 
-        InputException(const std::string& message)
+        ReaderException(const std::string& message)
         { 
             _message = message;
         }

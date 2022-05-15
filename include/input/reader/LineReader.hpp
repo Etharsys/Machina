@@ -5,7 +5,7 @@
 
 #include "logger.hpp"
 #include "MachinaExpression.hpp"
-#include "InputException.hpp"
+#include "ReaderException.hpp"
 
 class LineReader 
 {
