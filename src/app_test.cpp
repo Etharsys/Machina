@@ -21,7 +21,7 @@ int main(int argc, char const *argv[])
 {
     try {
         parseArgs(argc, argv);
-    } catch (const char* message) {
+    } catch (const std::string& message) {
         return 0;
     }
 
@@ -37,6 +37,5 @@ int main(int argc, char const *argv[])
         error(e.what());
     }
     
-
     return 0;
 }
