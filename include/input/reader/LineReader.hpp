@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
+#include <algorithm>
 
 #include "logger.hpp"
 #include "MachinaExpression.hpp"
@@ -11,22 +13,16 @@ class LineReader
 {
     private:
         std::string _line;
-        MachinaExpression _m_expr;
+        MachinaExpression _machinaExpression;
 
-        std::string trim(std::string line);
-
-        const std::vector<std::string> split(std::string line, std::string delimiter);
+        const std::string trim(std::string_view line);
+        const std::vector<std::string> split(std::string line, std::string_view delimiter);
 
     public:
-        LineReader(std::string line)
-            : _line { trim(line) }
-        { }
+        LineReader(std::string_view line);
         
         bool skip();
-
         void parse();
-
-        std::string get_line() { return _line; }
-        MachinaExpression get_m_expr() { return _m_expr; }
-
+        const std::string getLine();
+        const MachinaExpression getMachinaExpression();
 };

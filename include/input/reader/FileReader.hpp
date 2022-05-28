@@ -3,32 +3,27 @@
 #include <string_view>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 
 #include "logger.hpp"
 #include "project_config.hpp"
 #include "LineReader.hpp"
 
-class FileReader 
-{
+class FileReader {
     private:
-        std::ifstream _file_stream;
-
-        std::string _file_name;
+        std::ifstream _fileStream;
+        std::string _fileName;
         inline static std::string _prefix = "";
         inline static std::string _suffix = "";
 
-    public:
-        FileReader(std::string_view file_name)
-            : _file_name { file_name }
-        {
-            _prefix = RESOURCES_PREFIX;
-            _suffix = RESOURCES_SUFFIX;
-        }
+        const std::optional<MachinaExpression> checkLine(const std::string& line, u_int& index);
 
-        static void set_prefix(std::string_view prefix) { _prefix = prefix; }
-        static void set_suffix(std::string_view suffix) { _suffix = suffix; }
+    public:
+        FileReader(std::string_view fileName);
+
+        static void setPrefix(std::string_view prefix);
+        static void setSuffix(std::string_view suffix);
 
         void open();
-
         std::vector<MachinaExpression> read();
 };

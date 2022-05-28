@@ -10,18 +10,15 @@ class ReaderException : public std::exception
         std::string _message;
 
     public:
-        ReaderException()
-        {
+        ReaderException() {
             _message = "";
         }
 
-        ReaderException(const std::string& message)
-        { 
+        ReaderException(const std::string& message) { 
             _message = message;
         }
 
-        const char* what() const throw ()
-        {
+        const char* what() const throw () {
             return _message.data();
         }
 };

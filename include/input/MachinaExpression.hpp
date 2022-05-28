@@ -6,19 +6,31 @@
 #include <iterator>
 #include <iostream>
 
-/* here : enum of available _key (function) */
+/* TODO here : enum of available _key (function) */
 class MachinaExpression
 {
-    
+    private:
         std::string _key;
         std::vector<std::string> _values;
 
     public:
-        void set_key(std::string key) { _key = key; }
-        const std::string get_key() { return _key; }
+        void set_key(std::string key) { 
+            _key = key; 
+        }
 
-        void add(std::string value) { _values.emplace_back(value); }
-        std::vector<std::string> get_values() { return _values; }
+        // TOUSE
+        const std::string getKey() { 
+            return _key; 
+        }
+
+        // TOUSE
+        std::vector<std::string> getValues() { 
+            return _values; 
+        }
+
+        void add(std::string value) { 
+            _values.emplace_back(value); 
+        }
 
         friend std::ostream& operator<<(std::ostream& os, const MachinaExpression& dt);
 };

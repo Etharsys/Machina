@@ -2,34 +2,42 @@
 
 using namespace std;
 
-string LineReader::trim(string line)
-{
-    auto is_space = [](unsigned char const c) { return isspace(c); };
-    line.erase(remove_if(line.begin(), line.end(), is_space), line.end());
-    return line;
+LineReader::LineReader(string_view line)
+    : _line { trim(line) } { 
 }
 
-bool LineReader::skip()
-{
-    if (_line == "" || _line.at(0) == '#')
-    {
+const string LineReader::getLine() { 
+    return _line; 
+}
+
+const MachinaExpression LineReader::getMachinaExpression() { 
+    return _machinaExpression; 
+}
+
+const string LineReader::trim(string_view line) {
+    string lineCopy { line };
+    auto is_space = [](unsigned char const c) { return isspace(c); };
+    lineCopy.erase(remove_if(lineCopy.begin(), lineCopy.end(), is_space), lineCopy.end());
+    return lineCopy;
+}
+
+bool LineReader::skip() {
+    if (_line == "" || _line.at(0) == '#') {
         infos("Skipping line : " + _line);
         return true;
     }
-    if (_line.at(0) == ':')
-    {
-        throw ReaderException("Invalid caractere ':'" + _line);
+    if (_line.at(0) == ':') {
+        throw ReaderException("Invalid character ':'" + _line);
     }
     infos("Reading line : " + _line);
     return false;
 }
 
-const std::vector<std::string> LineReader::split(string line, string delimiter)
+const std::vector<std::string> LineReader::split(string line, string_view delimiter)
 {
     vector<string> tokens;
     size_t i = 0;
-    while (i != string::npos)
-    {
+    while (i != string::npos) {
         i = line.find(delimiter);
         tokens.emplace_back(line.substr(0, i));
         line.erase(0, i + delimiter.length());
@@ -40,20 +48,19 @@ const std::vector<std::string> LineReader::split(string line, string delimiter)
 void LineReader::parse()
 {
     vector<string> tokens = split(_line, ":");
-    _m_expr.set_key(tokens.at(0));
-    switch(tokens.size())
-    {
-        default: 
-            throw ReaderException("Impossible situation");
+    _machinaExpression.set_key(tokens.at(0));
+    switch(tokens.size()) {
         case 1: 
             break;
         case 2: 
-            if (tokens.at(1) == "") throw ReaderException("Arguments needed");
-            tokens = split(tokens.at(1), ",");
-            for (u_int i = 0; i < tokens.size(); i++)
-            {
-                _m_expr.add(tokens.at(i));
+            if (tokens.at(1) == "") {
+                throw ReaderException("Arguments needed");
             }
+            tokens = split(tokens.at(1), ",");
+            for_each(tokens.begin(), tokens.end(), [this](string& e){ _machinaExpression.add(e); });
+            break;
+        default: 
+            throw ReaderException("Impossible situation");
             break;
     }
 }
