@@ -1,10 +1,22 @@
-COUCOU
-CECI
-EST
-UN:cle
 
-CLE:
+MENU
+{
+    id: 1
+    title: Home
+    BUTTON
+    {
+        description: "vers menu 2" 
+        target: 2    
+    }
+}
 
-# cles doivent être listées !
-FICHIER: cez,fze f izejf ze, e
-MACHINA
+MENU
+{
+    id: 2, 3
+    title: Menu2
+    BUTTON 
+    {
+        description: "vers home" 
+        target: 1
+    }
+}
