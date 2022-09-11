@@ -5,18 +5,28 @@ MENU
     title: Home
     BUTTON
     {
-        description: "vers menu 2" 
-        target: 2    
+        description: "vers menu 2"
+        target: 2
     }
 }
 
+
+
 MENU
 {
-    id: 2, 3
-    title: Menu2
-    BUTTON 
+    BUTTON
     {
         description: "vers home" 
         target: 1
     }
+    # TO DO handle this following case
+    id: 2, 3
+    title: Menu2
 }
+
+BUTTON 
+{
+    description: "vers home" 
+    target: 1
+}
+

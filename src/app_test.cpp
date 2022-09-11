@@ -1,9 +1,13 @@
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 #include "logger.hpp"
 #include "FileReader.hpp"
 #include "ReaderException.hpp"
+#include "Parser.hpp"
+
+#include "IntTree.hpp"
 
 void parseArgs(int argc, char const* argv[]) {
     if (argc != 1) {
@@ -18,7 +22,9 @@ void parseArgs(int argc, char const* argv[]) {
 void test() {
     FileReader reader { "test" };
     reader.open();
-
+    const std::vector<MachinaExpression> tmp = reader.read();
+    Parser parser { tmp };
+    parser.parse();
     try {
         for(MachinaExpression v : reader.read())
         {
@@ -36,8 +42,6 @@ int main(int argc, char const *argv[]) {
         error(message);
         return 1;
     }
-
     test();
-    
     return 0;
 }

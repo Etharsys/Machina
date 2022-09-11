@@ -6,7 +6,6 @@
 #include <iterator>
 #include <iostream>
 
-/* TODO here : enum of available _key (function) */
 class MachinaExpression
 {
     private:
@@ -18,12 +17,10 @@ class MachinaExpression
             _key = key; 
         }
 
-        // TOUSE
         const std::string getKey() { 
             return _key; 
         }
 
-        // TOUSE
         std::vector<std::string> getValues() { 
             return _values; 
         }
