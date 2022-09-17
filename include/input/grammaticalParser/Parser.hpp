@@ -6,22 +6,104 @@
 #include "MachinaExpression.hpp"
 #include "Tree.hpp"
 
-enum Statuses { Parent, OpeningBrace, Body, ClosingBrace };
+namespace Statuses {
+    /**
+     * @brief represent a grammatical behaviour to parse
+     */
+    enum Statuses { 
+        Parent, 
+        OpeningBrace, 
+        Body, 
+        ClosingBrace 
+    };
+
+    const std::string statuses_str[] = { "Parent", "OpeningBrace", "Body", "ClosingBrace" };
+}
+
+using grammarValues = std::vector<std::pair<std::string, std::string>>;
 
 class Parser {
+
     private:
+        Tree _tree {};
+        std::string _currentNodeValue;
+
+        Statuses::Statuses _status;
+
         std::vector<MachinaExpression> _expressions;
         std::vector<MachinaExpression>::iterator _currentExpressionIterator;
+        std::string _currentExpressionKey;
 
         void fetchNextExpression();
-        bool parseParent(const std::string& key, Tree& tree, Statuses& status);
-        bool parseOpeningBrace(const std::string& key, const std::string& currentNodeValue, Statuses& status);
-        bool parseBody(const std::string& key, Tree& tree, const std::string& currentNodeValue, Statuses& status);
-        bool parseClosingBrace(const std::string& key, Tree& tree, const std::string& currentNodeValue, Statuses& status);
-        bool validateGrammar(MachinaExpression& expression, Tree& tree, Statuses& status);
+
+        /**
+         * @brief check is the token exist in the grammar
+         * 
+         * @param key the key to check
+         * @throw GrammaticalParserException when key does not exist
+         * @return grammarValues& values associated to the key
+         */
+        grammarValues& checkToken(const std::string& key);
+
+        /**
+         * @brief process to check if a token associated to a grammar key is rightly setup
+         * 
+         * @param values set of values associated to a key
+         * @param keyIterator the token iterator in the grammar to process
+         * @throw GrammaticalParserException when keyIterator does not exist
+         * @throw GrammaticalParserException when keyIterator has already been setup
+         */
+        void checkKeyIterator(grammarValues& values, const grammarValues::iterator& keyIterator);
+
+        /**
+         * @brief parse computation when parser has is Statuses set to 'Parent'
+         *  
+         * @throw GrammaticalParserException with call to checkToken with _currentExpressionKey
+         */
+        void parseParent();
+
+        /**
+         * @brief parse computation when parser has is Statuses set to 'OpeningBrace'
+         * 
+         * @throw GrammaticalParserException when no opening brace is provided
+         */
+        void parseOpeningBrace();
+
+        /**
+         * @brief parse computation when parser has is Statuses set to 'Body'
+         * 
+         * @throw GrammaticalParserException with call to checkKeyIterator
+         */
+        void parseBody();
+
+        /**
+         * @brief parse computation when parser has is Statuses set to 'ClosingBrace'
+         * 
+         * @throw GrammaticalParserException when a token associated to a key is missing
+         */
+        void parseClosingBrace();
+
+        /**
+         * @brief process a step (parsing one MachinaExpression) using a current status
+         * 
+         * @throw GrammaticalParserExcpetion with call of parseParent, parseOpeningBrace, 
+         *        parseBody and parseClosingBrace
+         */
+        void validateGrammar();
 
     public:
+        /**
+         * @brief Construct a new Parser object
+         * 
+         * @param expressions list of expression (readed by the Reader)
+         */
         Parser(const std::vector<MachinaExpression>& expressions);
 
+        /**
+         * @brief process the parsing 
+         * 
+         * @throw GrammaticalParserException when an opening brace has not been closed
+         */
         void parse();
+
 };

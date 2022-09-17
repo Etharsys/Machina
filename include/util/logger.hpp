@@ -24,7 +24,7 @@ inline void infos(std::string_view first, const Args&... args)
     if (MACHINA_INFOS)
     {
         output_color(10);
-        std::cout << "-INFOS- " << first;
+        std::cout << "[ INFO  ] " << first;
         UNPACK(std::cout << "\n        " << args);
         output_color(7);
         std::cout << std::endl;
@@ -37,7 +37,7 @@ inline void debug(std::string_view first, const Args&... args)
     if (MACHINA_DEBUG)
     {
         output_color(14);
-        std::cout << "-DEBUG- " << first;
+        std::cout << "[ DEBUG ] " << first;
         UNPACK(std::cout << "\n        " << args);
         output_color(7);
         std::cout << std::endl;
@@ -50,7 +50,7 @@ inline void error(std::string_view first, const Args&... args)
     if (MACHINA_ERROR)
     {
         output_color(12);
-        std::cout << "-ERROR- " << first;
+        std::cout << "[ ERROR ] " << first;
         UNPACK(std::cout << "\n        " << args);
         output_color(7);
         std::cout << std::endl;

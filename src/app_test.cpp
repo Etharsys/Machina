@@ -7,8 +7,6 @@
 #include "ReaderException.hpp"
 #include "Parser.hpp"
 
-#include "IntTree.hpp"
-
 void parseArgs(int argc, char const* argv[]) {
     if (argc != 1) {
         error("should not have arguments", "args are : ");

@@ -2,129 +2,128 @@
 
 #include "Parser.hpp"
 #include "logger.hpp"
+#include "GrammaticalParserException.hpp"
 
 using namespace std;
 
 Parser::Parser(const vector<MachinaExpression>& expressions)
-    : _expressions { expressions }, _currentExpressionIterator { _expressions.begin() }
-    { }
+    : _expressions { expressions }, 
+      _currentExpressionIterator { _expressions.begin() }
+{
+    _status = Statuses::Parent;
+}
 
 void Parser::fetchNextExpression() {
     _currentExpressionIterator++;
 }
 
-bool Parser::parseParent(const string& key, Tree& tree, Statuses& status) {
-    if (!GRAMMAR.contains(key)) {
-        error("Unexpected token exception, reading", key);
-        return false;
+grammarValues& Parser::checkToken(const std::string& key) {
+    const auto iterator = GRAMMAR.find(key);
+    if (iterator == GRAMMAR.end()) {
+        throw GrammaticalParserException { "Unexpected token : " + key };
     }
-    tree.addAndMoveToChild(key);
-    status = OpeningBrace;
-    return true;
+    return iterator->second;
 }
 
-bool Parser::parseOpeningBrace(const string& key, const string& currentNodeValue, Statuses& status) {
-    if (key != "{") {
-        error("Expected an opening brace at the token", currentNodeValue);
-        return false;
-    }
-    status = Body;
-    return true;
+void Parser::parseParent() {
+    checkToken(_currentExpressionKey);
+    _tree.addAndMoveToChild(_currentExpressionKey);
+    _status = Statuses::OpeningBrace;
 }
 
-bool Parser::parseBody(const string& key, Tree& tree, const string& currentNodeValue, Statuses& status) {
-    if (key == "}") {
-        status = ClosingBrace;
+void Parser::parseOpeningBrace() {
+    if (_currentExpressionKey != "{") {
+        throw GrammaticalParserException { "Expected an opening brace at the token : " + _currentNodeValue };
+    }
+    _status = Statuses::Body;
+}
+
+void Parser::checkKeyIterator(grammarValues& values, const grammarValues::iterator& keyIterator) {
+    if (keyIterator == values.end()) {
+        throw GrammaticalParserException { "Token : " + _currentNodeValue + " has no member named " + _currentExpressionKey };
+    }
+    if (keyIterator->second != DEFAULT_VALUE) {
+        throw GrammaticalParserException { "Token : " + _currentNodeValue + " cannot have two members: " + _currentExpressionKey };
+    }
+    if (GRAMMAR.contains(_currentExpressionKey)) { // it is a parent token
+        _tree.addAndMoveToChild(_currentExpressionKey);
+        _status = Statuses::OpeningBrace;
     }
     else {
-        const auto iterator = GRAMMAR.find(currentNodeValue);
-        if (iterator == GRAMMAR.end()) {
-            error("Unexpected token exception, reading", key);
-            return false;
-        }
-        vector<pair<string, string>>& values = iterator->second;
-        auto keyIterator = find_if(values.begin(), values.end(), [&key](const pair<string, string>& element){ return element.first == key; });
-        if (keyIterator == values.end()) {
-            error("Unexpected token exception\n        " + currentNodeValue + " has no member named", key);
-            return false;
-        }
-        if (keyIterator->second != "#NONE") {
-            error("Unexpected token exception\n        " + currentNodeValue + " cannot have two members: ", key);
-            return false;
-        }
-        if (GRAMMAR.contains(key)) { // it is a parent token
-            tree.addAndMoveToChild(key);
-            status = OpeningBrace;
-        }
-        else {
-            tree.addChild(key);
-        }
-        keyIterator->second = "#VALUE";
+        _tree.addChild(_currentExpressionKey);
     }
-    return true;
+    keyIterator->second = "#VALUE"; // TODO : set the right value
 }
 
-bool Parser::parseClosingBrace(const string& key, Tree& tree, const string& currentNodeValue, Statuses& status) {
-    const auto iterator = GRAMMAR.find(currentNodeValue);
-    if (iterator == GRAMMAR.end()) {
-        error("Unexpected token exception, reading", key);
-        return false;
+void Parser::parseBody() {
+    if (_currentExpressionKey == "}") {
+        _status = Statuses::ClosingBrace;
     }
-    vector<pair<string, string>>& values = iterator->second;
+    else {
+        grammarValues& values = checkToken(_currentNodeValue);
+        auto keyIterator = find_if(values.begin(), values.end(), [this](const pair<string, string>& element){ 
+            return element.first == _currentExpressionKey; 
+        });
+        checkKeyIterator(values, keyIterator);
+    }
+}
+
+void Parser::parseClosingBrace() {
+    grammarValues& values = checkToken(_currentNodeValue);
+
     for (pair<string, string>& value: values) { // check if the parent token has all of its token
-        if (value.second == "#NONE") {
-            error("Expected more values for the token " + currentNodeValue + "\n        Missing", value.first);
-            return false;
+        infos(value.first + ", " + value.second);
+        if (value.second == DEFAULT_VALUE) {
+            throw GrammaticalParserException { "Expected more values for the token : " + _currentNodeValue + ", missing : " + value.first };
         }
         else {
-            value.second = "#NONE";
+            value.second = DEFAULT_VALUE;
         }
     }
-    tree.moveToParent();
-    tree.isRoot() ? status = Parent : status = Body;
-    return true;
+
+    _tree.moveToParent();
+    _tree.isRoot() ? _status = Statuses::Parent : _status = Statuses::Body;
 }
 
-bool Parser::validateGrammar(MachinaExpression& expression, Tree& tree, Statuses& status) {
-    const string key = expression.getKey();
-    const string currentNodeValue = tree.getCurrentNode().getValue();
-    bool validateExpression = true;
-    switch (status) {
-        case Parent:
-            validateExpression = parseParent(key, tree, status);
-            break;
-        case OpeningBrace:
-            validateExpression = parseOpeningBrace(key, currentNodeValue, status);
-            break;
-        case Body:
-            validateExpression = parseBody(key, tree, currentNodeValue, status);
-            break;
-        case ClosingBrace:
-            validateExpression = parseClosingBrace(key, tree, currentNodeValue, status);
-            break;
-        default:
-            validateExpression = false;
-            break;
+void Parser::validateGrammar() {
+    _currentExpressionKey = _currentExpressionIterator->getKey();
+    _currentNodeValue = _tree.getCurrentNode().getValue();
+
+    try {
+        switch (_status) {
+            case Statuses::Parent:
+                parseParent();
+                break;
+            case Statuses::OpeningBrace:
+                parseOpeningBrace();
+                break;
+            case Statuses::Body:
+                parseBody();
+                break;
+            case Statuses::ClosingBrace:
+                parseClosingBrace();
+                break;
+            default:
+                throw GrammaticalParserException { "Unexpected behaviour occured" };
+                break;
+        }
+    } catch (const GrammaticalParserException& gpe) {
+        throw GrammaticalParserException { "Exception caught while validating grammar on status " + Statuses::statuses_str[_status] + " with error : " + gpe.what() };
     }
-    return validateExpression;
 }
 
 void Parser::parse() {
-    Tree tree = Tree();
-    Statuses status = Parent;
-    bool check = true;
     while (_currentExpressionIterator != _expressions.end()) {
-        check = validateGrammar(*_currentExpressionIterator, tree, status);
-        if (!check) {
-            break;
-        }
-        if (status == Parent || status == OpeningBrace || status == Body) {
+        validateGrammar();
+        
+        if (_status == Statuses::Parent || _status == Statuses::OpeningBrace || _status == Statuses::Body) {
             fetchNextExpression();
         }
     }
-    if (check && !tree.isRoot()) {
-        error("Expected a closing brace for the token", tree.getCurrentNode().getValue());
+
+    if (!_tree.isRoot()) {
+        throw GrammaticalParserException { "Expected a closing brace for the token : " + _tree.getCurrentNode().getValue() };
     }
-    tree.moveToRoot();
-    tree.display(tree.getRoot());
+    _tree.moveToRoot();
+    _tree.display(_tree.getRoot());
 }
