@@ -4,6 +4,7 @@
 #include "logger.hpp"
 #include "FileReader.hpp"
 #include "ReaderException.hpp"
+#include "iostream"
 
 void parseArgs(int argc, char const* argv[]) {
     if (argc != 1) {
@@ -12,6 +13,24 @@ void parseArgs(int argc, char const* argv[]) {
             debug(argv[i]);
         }
         throw "IllegalArgumentException";
+    }
+}
+
+void hard_loop() {
+    using namespace std;
+
+    string cli_input;
+    while(true) {
+	    getline(cin, cli_input);
+        if (cli_input.size() == 1 && cli_input.at(0) == 113)
+		{
+			cout << "Game ended, quiting ... ";
+            break;
+		}
+
+        // DO A LOT OF THINGS
+
+        cout << "HEY" << endl;
     }
 }
 
@@ -26,7 +45,10 @@ void test() {
         }
     } catch (ReaderException& e) {
         error(e.what());
+        return;
     }
+
+    hard_loop();
 }
 
 int main(int argc, char const *argv[]) {
