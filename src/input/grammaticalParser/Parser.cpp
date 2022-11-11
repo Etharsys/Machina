@@ -17,16 +17,18 @@ void Parser::fetchNextExpression() {
     _currentExpressionIterator++;
 }
 
-grammarValues& Parser::checkToken(const std::string& key) {
-    const auto iterator = GRAMMAR.find(key);
-    if (iterator == GRAMMAR.end()) {
-        throw GrammaticalParserException { "Unexpected token : " + key };
+grammarValues Parser::checkAndGetGrammarValuesByKey(const std::string& key) {
+    auto grammarMap = grammar->get();
+    const auto iterator = grammarMap.find(key);
+    if (iterator == grammarMap.end()) {
+        throw GrammaticalParserException { "Unexpected primary token : " + key };
     }
-    return iterator->second;
+    return grammarMap.at(iterator->first);
 }
 
 void Parser::parseParent() {
-    checkToken(_currentExpressionKey);
+    grammarValues valuesToCheck = checkAndGetGrammarValuesByKey(_currentExpressionKey);
+    _grammarResult.emplace(valuesToCheck);
     _tree.addAndMoveToChild(_currentExpressionKey, _currentExpressionKeyValues);
     _status = Statuses::OpeningBrace;
 }
@@ -42,17 +44,16 @@ void Parser::checkKeyIterator(grammarValues& values, const grammarValues::iterat
     if (keyIterator == values.end()) {
         throw GrammaticalParserException { "Token : " + _currentNodeKey + " has no member named " + _currentExpressionKey };
     }
-    if (keyIterator->second != DEFAULT_VALUE) {
+    if (keyIterator->second != grammar->defaultValue()) {
         throw GrammaticalParserException { "Token : " + _currentNodeKey + " cannot have two members: " + _currentExpressionKey };
     }
-    if (GRAMMAR.contains(_currentExpressionKey)) { // it is a parent token
-        _tree.addAndMoveToChild(_currentExpressionKey, _currentExpressionKeyValues);
-        _status = Statuses::OpeningBrace;
-    }
-    else {
+    int index = distance(values.begin(), keyIterator);
+    _grammarResult.top().at(index).second = "#VALUE";
+    if (grammar->get().contains(_currentExpressionKey)) { // it is a parent token
+        parseParent();
+    } else {
         _tree.addChild(_currentExpressionKey, _currentExpressionKeyValues);
     }
-    keyIterator->second = "#VALUE"; // TODO : set the right value
 }
 
 void Parser::parseBody() {
@@ -60,7 +61,7 @@ void Parser::parseBody() {
         _status = Statuses::ClosingBrace;
     }
     else {
-        grammarValues& values = checkToken(_currentNodeKey);
+        grammarValues values = _grammarResult.top();
         auto keyIterator = find_if(values.begin(), values.end(), [this](const pair<string, string>& element){ 
             return element.first == _currentExpressionKey; 
         });
@@ -69,17 +70,13 @@ void Parser::parseBody() {
 }
 
 void Parser::parseClosingBrace() {
-    grammarValues& values = checkToken(_currentNodeKey);
-
-    for (pair<string, string>& value: values) { // check if the parent token has all of its token
-        infos(value.first + ", " + value.second);
-        if (value.second == DEFAULT_VALUE) {
+    for (pair<string, string>& value: _grammarResult.top()) { 
+        // check if the parent token has all of its token
+        if (value.second == grammar->defaultValue()) {
             throw GrammaticalParserException { "Expected more values for the token : " + _currentNodeKey + ", missing : " + value.first };
         }
-        else {
-            value.second = DEFAULT_VALUE;
-        }
     }
+    _grammarResult.pop();
 
     _tree.moveToParent();
     _tree.isRoot() ? _status = Statuses::Parent : _status = Statuses::Body;

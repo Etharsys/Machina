@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <stack>
 
 #include "Grammar.hpp"
 #include "MachinaExpression.hpp"
@@ -35,16 +36,26 @@ class Parser {
         std::string _currentExpressionKey;
         std::vector<std::string> _currentExpressionKeyValues;
 
+        Grammar* grammar = Grammar::getInstance();
+
+        std::stack<grammarValues> _grammarResult = {};
+
+
+        /**
+         * @brief move _currentExpressionIterator
+         * 
+         */
         void fetchNextExpression();
 
         /**
-         * @brief check is the token exist in the grammar
+         * @brief check is the token with name key exist in the grammar 
+         * and return the assiociated value
          * 
          * @param key the key to check
          * @throw GrammaticalParserException when key does not exist
          * @return grammarValues& values associated to the key
          */
-        grammarValues& checkToken(const std::string& key);
+        grammarValues checkAndGetGrammarValuesByKey(const std::string& key);
 
         /**
          * @brief process to check if a token associated to a grammar key is rightly setup
