@@ -26,13 +26,14 @@ class Parser {
 
     private:
         Tree _tree {};
-        std::string _currentNodeValue;
+        std::string _currentNodeKey;
 
         Statuses::Statuses _status;
 
         std::vector<MachinaExpression> _expressions;
         std::vector<MachinaExpression>::iterator _currentExpressionIterator;
         std::string _currentExpressionKey;
+        std::vector<std::string> _currentExpressionKeyValues;
 
         void fetchNextExpression();
 
@@ -95,7 +96,7 @@ class Parser {
         /**
          * @brief Construct a new Parser object
          * 
-         * @param expressions list of expression (readed by the Reader)
+         * @param expressions list of expression (parsed by the syntactic parser)
          */
         Parser(const std::vector<MachinaExpression>& expressions);
 

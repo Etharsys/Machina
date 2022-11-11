@@ -28,20 +28,29 @@ void Tree::moveToParent() {
     _currentNode = _currentNode->getParent();
 }
 
-void Tree::addChild(string value) {
-    _currentNode->addChild(value);
+void Tree::addChild(string key, vector<string> keyValues) {
+    _currentNode->addChild(key, keyValues);
 }
 
-void Tree::addAndMoveToChild(string value) {
-    _currentNode = _currentNode->addChild(value);
+void Tree::addAndMoveToChild(string key, vector<string> keyValues) {
+    _currentNode = _currentNode->addChild(key, keyValues);
+}
+
+void displayVector(vector<string> keyValues) {
+    cout << " { ";
+    for_each(keyValues.begin(), keyValues.end(), [](const string& value) { cout << value << " "; });
+    cout << "}";
 }
 
 void Tree::display(Node node) {
     if (node.isLeaf()) {
-        cout << node.getValue();
+        cout << node.getKey();
+        displayVector(node.getKeyValues());
         return;
     }
-    cout << node.getValue() << " [ ";
+    cout << node.getKey();
+    displayVector(node.getKeyValues());
+    cout << " [ ";
     for (Node& child: node.getChildren()) {
         display(child);
         cout << " ";
@@ -53,15 +62,19 @@ void Tree::display(Node node) {
 /* ------------------------- */
 
 Node::Node()
-    : _value { "root" }, _parent { nullptr }
+    : _key { "root" }, _parent { nullptr }
     { }
 
-Node::Node(string value, shared_ptr<Node> parent)
-    : _value { value }, _parent { parent }
+Node::Node(string key, vector<string> keyValues, shared_ptr<Node> parent)
+    : _key { key }, _keyValues { keyValues }, _parent { parent }
     { }
 
-string Node::getValue() {
-    return _value;
+string Node::getKey() {
+    return _key;
+}
+
+vector<string> Node::getKeyValues() {
+    return _keyValues;
 }
 
 shared_ptr<Node> Node::getParent() {
@@ -78,16 +91,16 @@ vector<Node> Node::getChildren() {
 }
 
 
-vector<string> Node::getChildrenValue() {
+vector<string> Node::getChildrenKeys() {
     vector<string> children;
     for (shared_ptr<Node>& node: _children) {
-        children.push_back(node->getValue());
+        children.push_back(node->getKey());
     }
     return children;
 }
 
-shared_ptr<Node> Node::addChild(string value) {
-    shared_ptr<Node> child_ptr = make_shared<Node>(Node(value, shared_ptr<Node>(this)));
+shared_ptr<Node> Node::addChild(string key, vector<string> keyValues) {
+    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, keyValues, shared_ptr<Node>(this)));
     _children.push_back(child_ptr);
     return child_ptr;
 }

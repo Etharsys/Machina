@@ -7,24 +7,27 @@
 class Node {
 
   private:
-      std::string _value;
+      std::string _key;
+      std::vector<std::string> _keyValues {};
       std::shared_ptr<Node> _parent;
       std::vector<std::shared_ptr<Node>> _children {};
 
-      Node(std::string value, std::shared_ptr<Node> parent);
+      Node(std::string key, std::vector<std::string> keyValues, std::shared_ptr<Node> parent);
 
   public:
       Node();
 
-      std::string getValue();
+      std::string getKey();
+
+      std::vector<std::string> getKeyValues();
 
       std::shared_ptr<Node> getParent();
 
       std::vector<Node> getChildren();
 
-      std::vector<std::string> getChildrenValue();
+      std::vector<std::string> getChildrenKeys();
 
-      std::shared_ptr<Node> addChild(std::string value);
+      std::shared_ptr<Node> addChild(std::string key, std::vector<std::string> keyValues);
 
       bool isNode();
 
@@ -51,10 +54,11 @@ class Tree {
 
       void moveToParent();
 
-      void addChild(std::string value);
+      void addChild(std::string key, std::vector<std::string> keyValues);
 
-      void addAndMoveToChild(std::string value);
+      void addAndMoveToChild(std::string key, std::vector<std::string> keyValues);
       
       void display(Node node);
 
+      friend std::ostream& operator<<(std::ostream& os, const std::vector<std::string>& keyValues);
 };

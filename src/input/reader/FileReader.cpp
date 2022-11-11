@@ -1,8 +1,6 @@
-#include <FileReader.hpp>
-
+#include "FileReader.hpp"
 
 using namespace std;
-
 
 FileReader::FileReader(string_view fileName) 
     : _fileName { fileName } {
@@ -24,32 +22,29 @@ void FileReader::open() {
     _fileStream = ifstream { path.c_str() };
 }
 
-const optional<MachinaExpression> FileReader::checkLine(const string& line, u_int& index) {
-    index++;
-    LineReader lineReader { line };
-    try {
-        if (lineReader.skip()) {
-            return nullopt;
-        }
-        lineReader.parse();
-    } catch (const ReaderException& e) {
-        throw ReaderException { string(e.what()) + " (at line " + to_string(index) + " -> '" + line +  "')" };
-    }
-    return lineReader.getMachinaExpression();
+const string FileReader::trim(string line) {
+    auto is_space = [](unsigned char const c) { return isspace(c); };
+    line.erase(remove_if(line.begin(), line.end(), is_space), line.end());
+    return line;
 }
 
-vector<MachinaExpression> FileReader::read() { 
+
+bool FileReader::isLineIgnored(const string& line) {
+    return (line.empty() || line.at(0) == '#');
+}
+
+vector<string> FileReader::read() {
     if (!_fileStream.is_open()) {
         throw ReaderException { "Machina file is not open" };
     }
-    vector<MachinaExpression> expressions;
+    vector<string> lines;
     string line;
-    u_int index = 0;
     while(getline(_fileStream, line)) {
-        optional<MachinaExpression> res = checkLine(line, index);
-        if (res.has_value()){
-            expressions.emplace_back(res.value());
+        line = trim(line);
+        if (isLineIgnored(line)) {
+            continue;
         }
+        lines.push_back(line);
     }
-    return expressions;
+    return lines;
 }

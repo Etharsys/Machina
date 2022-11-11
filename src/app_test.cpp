@@ -6,6 +6,7 @@
 #include "FileReader.hpp"
 #include "ReaderException.hpp"
 #include "Parser.hpp"
+#include "SyntacticParser.hpp"
 
 void parseArgs(int argc, char const* argv[]) {
     if (argc != 1) {
@@ -20,17 +21,13 @@ void parseArgs(int argc, char const* argv[]) {
 void test() {
     FileReader reader { "test" };
     reader.open();
-    const std::vector<MachinaExpression> tmp = reader.read();
-    Parser parser { tmp };
+    const std::vector<std::string> lines = reader.read();
+
+    SyntacticParser syntacticParser { lines };
+    const std::vector<MachinaExpression> expressions = syntacticParser.parse();
+    
+    Parser parser { expressions };
     parser.parse();
-    try {
-        for(MachinaExpression v : reader.read())
-        {
-            std::cout << v << std::endl;
-        }
-    } catch (ReaderException& e) {
-        error(e.what());
-    }
 }
 
 int main(int argc, char const *argv[]) {
