@@ -100,7 +100,7 @@ vector<string> Node::getChildrenKeys() {
 }
 
 shared_ptr<Node> Node::addChild(string key, vector<string> keyValues) {
-    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, keyValues, shared_ptr<Node>(this)));
+    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, keyValues, shared_from_this()));
     _children.push_back(child_ptr);
     return child_ptr;
 }

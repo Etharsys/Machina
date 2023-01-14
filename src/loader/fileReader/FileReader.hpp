@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <vector>
 
 #include "logger.hpp"
 #include "project_config.hpp"

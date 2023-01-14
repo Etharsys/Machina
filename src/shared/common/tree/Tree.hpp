@@ -1,10 +1,10 @@
 #pragma once
 
-#include<vector>
-#include<string>
+#include <vector>
+#include <string>
 #include <memory>
 
-class Node {
+class Node : public std::enable_shared_from_this<Node> {
 
   private:
       std::string _key;

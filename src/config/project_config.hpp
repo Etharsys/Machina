@@ -6,5 +6,5 @@
 #define MACHINA_ERROR 1
 
 // RESOURCES PATH
-#define RESOURCES_PREFIX "\\..\\resources\\machina\\"
+#define RESOURCES_PREFIX "/../resources/machina/"
 #define RESOURCES_SUFFIX ".mach"
