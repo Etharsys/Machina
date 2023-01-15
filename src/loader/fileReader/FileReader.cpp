@@ -33,19 +33,21 @@ bool FileReader::isLineIgnored(const string& line) {
     return (line.empty() || line.at(0) == '#');
 }
 
-vector<string> FileReader::read() {
+vector<pair<int, string>> FileReader::read() {
     if (!_fileStream.is_open()) {
         throw ReaderException { "Cannot open Machina file" };
     }
-    vector<string> lines;
+    int lineNumber = 0;
+    vector<pair<int, string>> lines;
     string line;
     while(getline(_fileStream, line)) {
         line = trim(line);
+        lineNumber++;
         if (isLineIgnored(line)) {
             continue;
         }
         log("Reading line (trimed & considered) : " + line);
-        lines.push_back(line);
+        lines.push_back(make_pair(lineNumber, line));
     }
     return lines;
 }

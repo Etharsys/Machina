@@ -26,6 +26,7 @@ using grammarValues = std::vector<std::pair<std::string, std::string>>;
 class Parser {
 
     private:
+        inline static Parser* _instance = nullptr;
         Tree _tree {};
         std::string _currentNodeKey;
 
@@ -34,12 +35,19 @@ class Parser {
         std::vector<MachinaExpression> _expressions;
         std::vector<MachinaExpression>::iterator _currentExpressionIterator;
         std::string _currentExpressionKey;
+        int _currentExpressionFilePosition;
         std::vector<std::string> _currentExpressionKeyValues;
 
         Grammar* grammar = Grammar::getInstance();
 
         std::stack<grammarValues> _grammarResult = {};
 
+        /**
+         * @brief Construct a new Parser object
+         * 
+         * @param expressions list of expression (parsed by the syntactic parser)
+         */
+        Parser(const std::vector<MachinaExpression>& expressions);
 
         /**
          * @brief move _currentExpressionIterator
@@ -104,12 +112,11 @@ class Parser {
         void validateGrammar();
 
     public:
-        /**
-         * @brief Construct a new Parser object
-         * 
-         * @param expressions list of expression (parsed by the syntactic parser)
-         */
-        Parser(const std::vector<MachinaExpression>& expressions);
+        Parser(Parser &other) = delete;
+
+        void operator=(const Parser &) = delete;
+
+        static Parser *getInstance(const std::vector<MachinaExpression>& expressions);
 
         /**
          * @brief process the parsing 

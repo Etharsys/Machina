@@ -7,7 +7,7 @@
 
 using namespace std;
 
-SyntacticParser::SyntacticParser(const vector<string>& lines)
+SyntacticParser::SyntacticParser(const vector<pair<int, string>>& lines)
     : _lines { lines }
     { }
 
@@ -23,16 +23,17 @@ const vector<string> SyntacticParser::split(string line, string_view delimiter) 
     return tokens;
 }
 
-void SyntacticParser::parseArgument(string currentLine) {
+void SyntacticParser::parseArgument(pair<int, string> currentLine) {
     MachinaExpression expression;
-    vector<string> tokens = split(currentLine, ":");
+    vector<string> tokens = split(currentLine.second, ":");
     expression.set_key(tokens.at(0));
+    expression.set_filePosition(currentLine.first);
     switch(tokens.size()) {
         case 1:
             break;
         case 2:
             if (tokens.at(1) == "") {
-                throw SyntacticParserException("Arguments needed"); // maybe set the number line
+                throw SyntacticParserException("Arguments needed at line " + to_string(currentLine.first));
             }
             tokens = split(tokens.at(1), ",");
             for_each(tokens.begin(), tokens.end(), [&expression](string& e){ expression.add(e); });
@@ -46,9 +47,9 @@ void SyntacticParser::parseArgument(string currentLine) {
 }
 
 const vector<MachinaExpression> SyntacticParser::parse() {
-    for_each(_lines.begin(), _lines.end(), [this](string& currentLine) {
-        if (currentLine.at(0) == ':') {
-            throw SyntacticParserException("Invalid character ':'" + currentLine);
+    for_each(_lines.begin(), _lines.end(), [this](pair<int, string>& currentLine) {
+        if (currentLine.second.at(0) == ':') {
+            throw SyntacticParserException("Invalid character ':' at line " + to_string(currentLine.first));
         }
         parseArgument(currentLine);
     });

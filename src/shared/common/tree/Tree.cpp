@@ -30,12 +30,12 @@ void Tree::moveToParent() {
     _currentNode = _currentNode->getParent();
 }
 
-void Tree::addChild(string key, vector<string> keyValues) {
-    _currentNode->addChild(key, keyValues);
+void Tree::addChild(string key, vector<string> keyValues, int filePosition) {
+    _currentNode->addChild(key, keyValues, filePosition);
 }
 
-void Tree::addAndMoveToChild(string key, vector<string> keyValues) {
-    _currentNode = _currentNode->addChild(key, keyValues);
+void Tree::addAndMoveToChild(string key, vector<string> keyValues, int filePosition) {
+    _currentNode = _currentNode->addChild(key, keyValues, filePosition);
 }
 
 inline string displayNode(Node node) {
@@ -73,8 +73,8 @@ Node::Node()
     : _key { "root" }, _depth { 0 }, _parent { nullptr }
     { }
 
-Node::Node(string key, int depth, vector<string> keyValues, shared_ptr<Node> parent)
-    : _key { key }, _depth { depth }, _keyValues { keyValues }, _parent { parent }
+Node::Node(string key, int depth, vector<string> keyValues, int filePosition, shared_ptr<Node> parent)
+    : _key { key }, _depth { depth }, _keyValues { keyValues }, _filePosition { filePosition }, _parent { parent }
     { }
 
 string Node::getKey() {
@@ -87,6 +87,10 @@ int Node::getDepth() {
 
 vector<string> Node::getKeyValues() {
     return _keyValues;
+}
+
+int Node::getFilePosition() {
+    return _filePosition;
 }
 
 shared_ptr<Node> Node::getParent() {
@@ -111,8 +115,8 @@ vector<string> Node::getChildrenKeys() {
     return children;
 }
 
-shared_ptr<Node> Node::addChild(string key, vector<string> keyValues) {
-    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, _depth+1, keyValues, shared_from_this()));
+shared_ptr<Node> Node::addChild(string key, vector<string> keyValues, int filePosition) {
+    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, _depth+1, keyValues, filePosition, shared_from_this()));
     _children.push_back(child_ptr);
     return child_ptr;
 }

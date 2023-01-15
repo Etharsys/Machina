@@ -7,6 +7,13 @@
 
 using namespace std;
 
+Parser *Parser::getInstance(const vector<MachinaExpression>& expressions) {
+    if (_instance == nullptr) {
+        _instance = new Parser(expressions);
+    }
+    return _instance;
+}
+
 Parser::Parser(const vector<MachinaExpression>& expressions)
     : _expressions { expressions }, 
       _currentExpressionIterator { _expressions.begin() }
@@ -22,7 +29,7 @@ grammarValues Parser::checkAndGetGrammarValuesByKey(const std::string& key) {
     auto grammarMap = grammar->get();
     const auto iterator = grammarMap.find(key);
     if (iterator == grammarMap.end()) {
-        throw GrammaticalParserException { "Unexpected primary token : " + key };
+        throw GrammaticalParserException { "Unexpected primary token at line " + to_string(_currentExpressionFilePosition) + " : " + key };
     }
     return grammarMap.at(iterator->first);
 }
@@ -30,30 +37,30 @@ grammarValues Parser::checkAndGetGrammarValuesByKey(const std::string& key) {
 void Parser::parseParent() {
     grammarValues valuesToCheck = checkAndGetGrammarValuesByKey(_currentExpressionKey);
     _grammarResult.emplace(valuesToCheck);
-    _tree.addAndMoveToChild(_currentExpressionKey, _currentExpressionKeyValues);
+    _tree.addAndMoveToChild(_currentExpressionKey, _currentExpressionKeyValues, _currentExpressionFilePosition);
     _status = Statuses::OpeningBrace;
 }
 
 void Parser::parseOpeningBrace() {
     if (_currentExpressionKey != "{") {
-        throw GrammaticalParserException { "Expected an opening brace at the token : " + _currentNodeKey };
+        throw GrammaticalParserException { "Expected an opening brace at line " + to_string(_currentExpressionFilePosition) + " for the token : " + _currentNodeKey };
     }
     _status = Statuses::Body;
 }
 
 void Parser::checkKeyIterator(grammarValues& values, const grammarValues::iterator& keyIterator) {
     if (keyIterator == values.end()) {
-        throw GrammaticalParserException { "Token : " + _currentNodeKey + " has no member named " + _currentExpressionKey };
+        throw GrammaticalParserException { "Token : " + _currentNodeKey + " has no member named " + _currentExpressionKey + " at line " + to_string(_currentExpressionFilePosition) };
     }
     if (keyIterator->second != grammar->defaultValue()) {
-        throw GrammaticalParserException { "Token : " + _currentNodeKey + " cannot have two members: " + _currentExpressionKey };
+        throw GrammaticalParserException { "Token : " + _currentNodeKey + " cannot have two members: " + _currentExpressionKey + " at line " + to_string(_currentExpressionFilePosition) };
     }
     int index = distance(values.begin(), keyIterator);
     _grammarResult.top().at(index).second = "#VALUE";
     if (grammar->get().contains(_currentExpressionKey)) { // it is a parent token
         parseParent();
     } else {
-        _tree.addChild(_currentExpressionKey, _currentExpressionKeyValues);
+        _tree.addChild(_currentExpressionKey, _currentExpressionKeyValues, _currentExpressionFilePosition);
     }
 }
 
@@ -74,7 +81,7 @@ void Parser::parseClosingBrace() {
     for (pair<string, string>& value: _grammarResult.top()) { 
         // check if the parent token has all of its token
         if (value.second == grammar->defaultValue()) {
-            throw GrammaticalParserException { "Expected more values for the token : " + _currentNodeKey + ", missing : " + value.first };
+            throw GrammaticalParserException { "Expected more values for the token " + _currentNodeKey + " at line " + to_string(_tree.getCurrentNode().getFilePosition()) + ", missing : " + value.first };
         }
     }
     _grammarResult.pop();
@@ -86,8 +93,8 @@ void Parser::parseClosingBrace() {
 void Parser::validateGrammar() {
     _currentExpressionKey = _currentExpressionIterator->getKey();
     _currentExpressionKeyValues = _currentExpressionIterator->getValues();
+    _currentExpressionFilePosition = _currentExpressionIterator->getFilePosition();
     _currentNodeKey = _tree.getCurrentNode().getKey();
-
     try {
         switch (_status) {
             case Statuses::Parent:
@@ -126,7 +133,7 @@ void Parser::parse() {
     }
 
     if (!_tree.isRoot()) {
-        throw GrammaticalParserException { "Expected a closing brace for the token : " + _tree.getCurrentNode().getKey() };
+        throw GrammaticalParserException { "Expected a closing brace for the token : " + _tree.getCurrentNode().getKey() + " at line " + to_string(_tree.getCurrentNode().getFilePosition()) };
     }
     _tree.moveToRoot();
     _tree.display();

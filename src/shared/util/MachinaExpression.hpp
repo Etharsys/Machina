@@ -11,14 +11,23 @@ class MachinaExpression
     private:
         std::string _key;
         std::vector<std::string> _values;
+        int _filePosition;
 
     public:
         void set_key(std::string key) { 
             _key = key; 
         }
 
+        void set_filePosition(const int filePosition) {
+            _filePosition = filePosition;
+        }
+
         const std::string getKey() { 
             return _key; 
+        }
+
+        int getFilePosition() {
+            return _filePosition;
         }
 
         std::vector<std::string> getValues() { 
