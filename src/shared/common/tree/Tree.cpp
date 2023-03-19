@@ -36,41 +36,51 @@ void Tree::addAndMoveToChild(string key, vector<string> keyValues) {
     _currentNode = _currentNode->addChild(key, keyValues);
 }
 
-void displayVector(vector<string> keyValues) {
-    cout << " { ";
-    for_each(keyValues.begin(), keyValues.end(), [](const string& value) { cout << value << " "; });
-    cout << "}";
+void Tree::displayNode(Node node) {
+    cout << node.getKey();
+    const vector<string> values = node.getKeyValues();
+    if (values.empty()) {
+        return;
+    }
+    cout << " -> ";
+    for_each(values.begin(), values.end(), [](const string& value) { cout << value << " "; });
+}
+
+void Tree::displayTree(Node node) {
+    for (int i = 0; i < node.getDepth(); ++i) {
+        cout << " | ";
+    }
+    if (node.isLeaf()) {
+        displayNode(node);
+        return;
+    }
+    displayNode(node);
+    const auto children = node.getChildren();
+    for_each(children.begin(), children.end(), [this](const Node& child) { cout << "\n"; displayTree(child); });
+    return;
 }
 
 void Tree::display(Node node) {
-    if (node.isLeaf()) {
-        cout << node.getKey();
-        displayVector(node.getKeyValues());
-        return;
-    }
-    cout << node.getKey();
-    displayVector(node.getKeyValues());
-    cout << " [ ";
-    for (Node& child: node.getChildren()) {
-        display(child);
-        cout << " ";
-    }
-    cout << "]";
-    return;
+    displayTree(node);
+    cout << "\n";
 }
 
 /* ------------------------- */
 
 Node::Node()
-    : _key { "root" }, _parent { nullptr }
+    : _key { "root" }, _depth { 0 }, _parent { nullptr }
     { }
 
-Node::Node(string key, vector<string> keyValues, shared_ptr<Node> parent)
-    : _key { key }, _keyValues { keyValues }, _parent { parent }
+Node::Node(string key, int depth, vector<string> keyValues, shared_ptr<Node> parent)
+    : _key { key }, _depth { depth }, _keyValues { keyValues }, _parent { parent }
     { }
 
 string Node::getKey() {
     return _key;
+}
+
+int Node::getDepth() {
+    return _depth;
 }
 
 vector<string> Node::getKeyValues() {
@@ -100,7 +110,7 @@ vector<string> Node::getChildrenKeys() {
 }
 
 shared_ptr<Node> Node::addChild(string key, vector<string> keyValues) {
-    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, keyValues, shared_from_this()));
+    shared_ptr<Node> child_ptr = make_shared<Node>(Node(key, _depth+1, keyValues, shared_from_this()));
     _children.push_back(child_ptr);
     return child_ptr;
 }

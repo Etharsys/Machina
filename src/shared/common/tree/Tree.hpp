@@ -8,16 +8,19 @@ class Node : public std::enable_shared_from_this<Node> {
 
   private:
       std::string _key;
+      int _depth;
       std::vector<std::string> _keyValues {};
       std::shared_ptr<Node> _parent;
       std::vector<std::shared_ptr<Node>> _children {};
 
-      Node(std::string key, std::vector<std::string> keyValues, std::shared_ptr<Node> parent);
+      Node(std::string key, int depth, std::vector<std::string> keyValues, std::shared_ptr<Node> parent);
 
   public:
       Node();
 
       std::string getKey();
+
+      int getDepth();
 
       std::vector<std::string> getKeyValues();
 
@@ -40,6 +43,10 @@ class Tree {
   private:
       std::shared_ptr<Node> _root;
       std::shared_ptr<Node> _currentNode;
+
+      void displayNode(Node node);
+
+      void displayTree(Node node);
 
   public:
       Tree();
