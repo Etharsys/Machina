@@ -7,11 +7,6 @@
 
 #include "project_config.hpp"
 
-#define UNPACK(...)                   \
-  (void)::std::initializer_list<int>{ \
-    (void((__VA_ARGS__)), 0)...       \
-  }
-
 namespace Color {
 
     enum Code {
@@ -38,17 +33,32 @@ namespace Color {
 
 inline Color::Modifier white(Color::FG_DEFAULT);
 
+/* UNPACK */
+
+inline void unpack() {}
+
 template<class... Args>
-inline void infos(std::string_view first, const Args&... args)
+inline void unpack(std::string_view first, const Args&... args)
+{
+    std::cout << "\t  " << first << std::endl;
+    unpack(args...);
+}
+
+/* LOG */
+
+template<class... Args>
+inline void log(std::string_view first, const Args&... args)
 {
     if (MACHINA_INFOS)
     {
         Color::Modifier green(Color::FG_GREEN);
-        std::cout << green << "[ INFO  ] " << first;
-        UNPACK(std::cout << "\n        " << args);
-        std::cout << white << std::endl;
+        std::cout << green << "[  LOG  ] " << first << std::endl;
+        unpack(args...);
+        std::cout << white;
     }
 }
+
+/* DEBUG */
 
 template<class... Args>
 inline void debug(std::string_view first, const Args&... args)
@@ -57,10 +67,12 @@ inline void debug(std::string_view first, const Args&... args)
     {
         Color::Modifier orange(Color::FG_ORANGE);
         std::cout << orange << "[ DEBUG ] " << first;
-        UNPACK(std::cout << "\n        " << args);
+        unpack(args...);
         std::cout << white << std::endl;
     }
 }
+
+/* ERROR */
 
 template<class... Args>
 inline void error(std::string_view first, const Args&... args)
@@ -69,7 +81,7 @@ inline void error(std::string_view first, const Args&... args)
     {
         Color::Modifier red(Color::FG_RED);
         std::cout << red << "[ ERROR ] " << first;
-        UNPACK(std::cout << "\n        " << args);
+        unpack(args...);
         std::cout << white << std::endl;
     }
 }

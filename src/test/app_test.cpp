@@ -19,13 +19,16 @@ void parseArgs(int argc, char const* argv[]) {
 }
 
 void test() {
-    FileReader reader { "test" };
+    log("Start reading program '" + std::string(TEST_PROGRAM) + "' ... ");
+    FileReader reader { std::string(TEST_PROGRAM) };
     reader.open();
     const std::vector<std::string> lines = reader.read();
 
+    log("Start parsing syntax ...");
     SyntacticParser syntacticParser { lines };
     const std::vector<MachinaExpression> expressions = syntacticParser.parse();
     
+    log("Start parsing grammar ...");
     Parser parser { expressions };
     parser.parse();
 }

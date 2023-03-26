@@ -3,6 +3,7 @@
 #include "Parser.hpp"
 #include "logger.hpp"
 #include "GrammaticalParserException.hpp"
+#include "vector_util.hpp"
 
 using namespace std;
 
@@ -112,6 +113,11 @@ void Parser::validateGrammar() {
 
 void Parser::parse() {
     while (_currentExpressionIterator != _expressions.end()) {
+        log("Parsing expression ...",
+            "Current key : '" + _currentExpressionKey + "'",
+            "Current values : '" + toString(_currentExpressionKeyValues) + "'", 
+            "Status : " + to_string(_status),
+            "Current Node key from tree : " + _currentNodeKey);
         validateGrammar();
         
         if (_status == Statuses::Parent || _status == Statuses::OpeningBrace || _status == Statuses::Body) {
@@ -123,5 +129,5 @@ void Parser::parse() {
         throw GrammaticalParserException { "Expected a closing brace for the token : " + _tree.getCurrentNode().getKey() };
     }
     _tree.moveToRoot();
-    _tree.display(_tree.getRoot());
+    _tree.display();
 }

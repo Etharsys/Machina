@@ -1,5 +1,8 @@
 #pragma once
 
+// PROGRAM NAMES
+#define TEST_PROGRAM "test"
+
 // DEBUG ACTIVATION
 #define MACHINA_INFOS 1
 #define MACHINA_DEBUG 1

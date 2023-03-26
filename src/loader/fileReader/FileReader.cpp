@@ -18,7 +18,7 @@ void FileReader::setSuffix(string_view suffix) {
 
 void FileReader::open() {
     const string path = filesystem::current_path().string() + "" + _prefix + "" + _fileName + "" + _suffix;
-    infos(path);
+    log("Path to read at : " + path);
     _fileStream = ifstream { path.c_str() };
 }
 
@@ -35,7 +35,7 @@ bool FileReader::isLineIgnored(const string& line) {
 
 vector<string> FileReader::read() {
     if (!_fileStream.is_open()) {
-        throw ReaderException { "Machina file is not open" };
+        throw ReaderException { "Cannot open Machina file" };
     }
     vector<string> lines;
     string line;
@@ -44,6 +44,7 @@ vector<string> FileReader::read() {
         if (isLineIgnored(line)) {
             continue;
         }
+        log("Reading line (trimed & considered) : " + line);
         lines.push_back(line);
     }
     return lines;
