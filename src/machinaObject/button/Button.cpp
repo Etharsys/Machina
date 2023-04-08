@@ -2,6 +2,8 @@
 
 #include <string_view>
 #include <iostream>
+#include <algorithm>
+#include <vector>
 
 #include "MenuManager.hpp"
 

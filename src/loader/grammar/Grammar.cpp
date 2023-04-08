@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "ButtonFactory.hpp"
+
 using namespace std;
 
 Grammar *Grammar::getInstance() {
@@ -34,8 +36,8 @@ void Grammar::emplaceMenu() {
 
 void Grammar::emplaceButton() {
     vector<pairSS> values { 
-        std::make_pair("description", DEFAULT_VALUE), 
-        std::make_pair("target", DEFAULT_VALUE)
+        std::make_pair(ButtonFactory::_description, DEFAULT_VALUE),
+        std::make_pair(ButtonFactory::_target, DEFAULT_VALUE)
     };
     _grammar.try_emplace("BUTTON", values);
 }

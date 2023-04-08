@@ -2,6 +2,8 @@
 
 #include <string_view>
 
+#include "Tree.hpp"
+
 class Button {
     private:
        std::string_view _description;

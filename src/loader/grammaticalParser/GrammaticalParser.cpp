@@ -1,31 +1,32 @@
 #include <algorithm>
 
-#include "Parser.hpp"
+#include "GrammaticalParser.hpp"
 #include "logger.hpp"
 #include "GrammaticalParserException.hpp"
 #include "vector_util.hpp"
 
 using namespace std;
 
-Parser *Parser::getInstance(const vector<MachinaExpression>& expressions) {
+GrammaticalParser *GrammaticalParser::getInstance(const vector<MachinaExpression>& expressions) {
     if (_instance == nullptr) {
-        _instance = new Parser(expressions);
+        _instance = new GrammaticalParser(expressions);
     }
     return _instance;
 }
 
-Parser::Parser(const vector<MachinaExpression>& expressions)
+GrammaticalParser::GrammaticalParser(const vector<MachinaExpression>& expressions)
     : _expressions { expressions }, 
-      _currentExpressionIterator { _expressions.begin() }
+      _currentExpressionIterator { _expressions.begin() },
+      _currentExpressionFilePosition { 0 }
 {
     _status = Statuses::Parent;
 }
 
-void Parser::fetchNextExpression() {
+void GrammaticalParser::fetchNextExpression() {
     _currentExpressionIterator++;
 }
 
-grammarValues Parser::checkAndGetGrammarValuesByKey(const std::string& key) {
+grammarValues GrammaticalParser::checkAndGetGrammarValuesByKey(const std::string& key) {
     auto grammarMap = grammar->get();
     const auto iterator = grammarMap.find(key);
     if (iterator == grammarMap.end()) {
@@ -34,28 +35,28 @@ grammarValues Parser::checkAndGetGrammarValuesByKey(const std::string& key) {
     return grammarMap.at(iterator->first);
 }
 
-void Parser::parseParent() {
+void GrammaticalParser::parseParent() {
     grammarValues valuesToCheck = checkAndGetGrammarValuesByKey(_currentExpressionKey);
     _grammarResult.emplace(valuesToCheck);
     _tree.addAndMoveToChild(_currentExpressionKey, _currentExpressionKeyValues, _currentExpressionFilePosition);
     _status = Statuses::OpeningBrace;
 }
 
-void Parser::parseOpeningBrace() {
+void GrammaticalParser::parseOpeningBrace() {
     if (_currentExpressionKey != "{") {
         throw GrammaticalParserException { "Expected an opening brace at line " + to_string(_currentExpressionFilePosition) + " for the token : " + _currentNodeKey };
     }
     _status = Statuses::Body;
 }
 
-void Parser::checkKeyIterator(grammarValues& values, const grammarValues::iterator& keyIterator) {
+void GrammaticalParser::checkKeyIterator(grammarValues& values, const grammarValues::iterator& keyIterator) {
     if (keyIterator == values.end()) {
         throw GrammaticalParserException { "Token : " + _currentNodeKey + " has no member named " + _currentExpressionKey + " at line " + to_string(_currentExpressionFilePosition) };
     }
     if (keyIterator->second != grammar->defaultValue()) {
         throw GrammaticalParserException { "Token : " + _currentNodeKey + " cannot have two members: " + _currentExpressionKey + " at line " + to_string(_currentExpressionFilePosition) };
     }
-    int index = distance(values.begin(), keyIterator);
+    long long index = distance(values.begin(), keyIterator);
     _grammarResult.top().at(index).second = "#VALUE";
     if (grammar->get().contains(_currentExpressionKey)) { // it is a parent token
         parseParent();
@@ -64,7 +65,7 @@ void Parser::checkKeyIterator(grammarValues& values, const grammarValues::iterat
     }
 }
 
-void Parser::parseBody() {
+void GrammaticalParser::parseBody() {
     if (_currentExpressionKey == "}") {
         _status = Statuses::ClosingBrace;
     }
@@ -77,7 +78,7 @@ void Parser::parseBody() {
     }
 }
 
-void Parser::parseClosingBrace() {
+void GrammaticalParser::parseClosingBrace() {
     for (pair<string, string>& value: _grammarResult.top()) { 
         // check if the parent token has all of its token
         if (value.second == grammar->defaultValue()) {
@@ -90,7 +91,7 @@ void Parser::parseClosingBrace() {
     _tree.isRoot() ? _status = Statuses::Parent : _status = Statuses::Body;
 }
 
-void Parser::validateGrammar() {
+void GrammaticalParser::validateGrammar() {
     _currentExpressionKey = _currentExpressionIterator->getKey();
     _currentExpressionKeyValues = _currentExpressionIterator->getValues();
     _currentExpressionFilePosition = _currentExpressionIterator->getFilePosition();
@@ -118,7 +119,7 @@ void Parser::validateGrammar() {
     }
 }
 
-void Parser::parse() {
+const Tree& GrammaticalParser::parse() {
     while (_currentExpressionIterator != _expressions.end()) {
         log("Parsing expression ...",
             "Current key : '" + _currentExpressionKey + "'",
@@ -137,4 +138,5 @@ void Parser::parse() {
     }
     _tree.moveToRoot();
     _tree.display();
+    return _tree;
 }

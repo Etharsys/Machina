@@ -23,10 +23,10 @@ namespace Statuses {
 
 using grammarValues = std::vector<std::pair<std::string, std::string>>;
 
-class Parser {
+class GrammaticalParser {
 
     private:
-        inline static Parser* _instance = nullptr;
+        inline static GrammaticalParser* _instance = nullptr;
         Tree _tree {};
         std::string _currentNodeKey;
 
@@ -43,11 +43,11 @@ class Parser {
         std::stack<grammarValues> _grammarResult = {};
 
         /**
-         * @brief Construct a new Parser object
+         * @brief Construct a new GrammaticalParser object
          * 
          * @param expressions list of expression (parsed by the syntactic parser)
          */
-        Parser(const std::vector<MachinaExpression>& expressions);
+        GrammaticalParser(const std::vector<MachinaExpression>& expressions);
 
         /**
          * @brief move _currentExpressionIterator
@@ -112,17 +112,17 @@ class Parser {
         void validateGrammar();
 
     public:
-        Parser(Parser &other) = delete;
+        GrammaticalParser(GrammaticalParser &other) = delete;
 
-        void operator=(const Parser &) = delete;
+        void operator=(const GrammaticalParser &) = delete;
 
-        static Parser *getInstance(const std::vector<MachinaExpression>& expressions);
+        static GrammaticalParser *getInstance(const std::vector<MachinaExpression>& expressions);
 
         /**
          * @brief process the parsing 
          * 
          * @throw GrammaticalParserException when an opening brace has not been closed
          */
-        void parse();
+        const Tree& parse();
 
 };

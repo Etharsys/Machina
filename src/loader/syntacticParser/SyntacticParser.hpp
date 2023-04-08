@@ -35,7 +35,7 @@ class SyntacticParser {
     public:
 
         /**
-         * @brief Construct a new Syntactic Parser object
+         * @brief Construct a new Syntactic Grammatical Parser object
          * 
          * @param lines list of lines (readed by the file reader)
          */

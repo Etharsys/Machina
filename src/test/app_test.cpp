@@ -5,8 +5,11 @@
 #include "logger.hpp"
 #include "FileReader.hpp"
 #include "ReaderException.hpp"
-#include "Parser.hpp"
+#include "GrammaticalParser.hpp"
 #include "SyntacticParser.hpp"
+#include "Main.hpp"
+#include "Generator.hpp"
+#include "Tree.hpp"
 
 void parseArgs(int argc, char const* argv[]) {
     if (argc != 1) {
@@ -29,8 +32,15 @@ void test() {
     const std::vector<MachinaExpression> expressions = syntacticParser.parse();
     
     log("Start parsing grammar ...");
-    Parser* parser = Parser::getInstance(expressions);
-    parser->parse();
+    GrammaticalParser* parser = GrammaticalParser::getInstance(expressions);
+    const Tree tree = parser->parse();
+    
+    log("Start generator ...");
+    Generator* generator = Generator::getInstance();
+    Main main = generator->generate(tree);
+
+    log("Start Machina program ...");
+    main.fakeLoop();
 }
 
 int main(int argc, char const *argv[]) {
