@@ -2,4 +2,6 @@ build/
 CMakeFiles/
 lib/
 CMakeCache.txt
+CMakeSettings.json
 .vscode
+.vs

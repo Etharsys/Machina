@@ -5,5 +5,6 @@
 inline std::string toString(const std::vector<std::string>& v) {
     std::string s = "[";
     for_each(v.begin(), v.end(), [&s](std::string_view sv){ s = s.append(sv); });
+    s = s.append("]");
     return s;
 }

@@ -27,5 +27,12 @@ file(GLOB_RECURSE src_files src/*.cpp)
 
 add_executable(machina ${src_files} ${inc_files})
 
-target_compile_options(machina PRIVATE -Wall -Wextra -Werror -ansi -pedantic)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    message("GCC detected, adding compile flags ... ")
+    target_compile_options(machina PRIVATE -Wall -Wextra -Werror -ansi -pedantic)
+else()
+    message("Other compiler detected, no compile flags.")
+    target_compile_options(machina PRIVATE)
+endif()
+
 target_compile_features(machina PRIVATE cxx_std_20)
