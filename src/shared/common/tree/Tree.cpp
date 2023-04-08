@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "logger.hpp"
+
 using namespace std;
 
 Tree::Tree()
@@ -36,33 +38,33 @@ void Tree::addAndMoveToChild(string key, vector<string> keyValues) {
     _currentNode = _currentNode->addChild(key, keyValues);
 }
 
-void Tree::displayNode(Node node) {
-    cout << node.getKey();
-    const vector<string> values = node.getKeyValues();
-    if (values.empty()) {
-        return;
+inline string displayNode(Node node) {
+    string nodeString = node.getKey();
+    const std::vector<std::string> values = node.getKeyValues();
+    if (!values.empty()) {
+        nodeString = nodeString.append(" -> ");
+        for_each(values.begin(), values.end(), [&nodeString](const std::string& value) { nodeString = nodeString.append(value + " "); });
     }
-    cout << " -> ";
-    for_each(values.begin(), values.end(), [](const string& value) { cout << value << " "; });
+    return nodeString;
 }
 
-void Tree::displayTree(Node node) {
+inline void displayTreeLine(Node node) {
+    string line = "";
     for (int i = 0; i < node.getDepth(); ++i) {
-        cout << " | ";
+        line = line.append(" | ");
     }
     if (node.isLeaf()) {
-        displayNode(node);
+        log(line.append(displayNode(node)));
         return;
     }
-    displayNode(node);
+    log(line.append(displayNode(node)));
     const auto children = node.getChildren();
-    for_each(children.begin(), children.end(), [this](const Node& child) { cout << "\n"; displayTree(child); });
-    return;
+    for_each(children.begin(), children.end(), [&line](const Node& child) { displayTreeLine(child); });
 }
 
-void Tree::display(Node node) {
-    displayTree(node);
-    cout << "\n";
+void Tree::display() {
+    log("Final parsed tree (from root) : ");
+    displayTreeLine(getRoot());
 }
 
 /* ------------------------- */
@@ -122,5 +124,3 @@ bool Node::isNode() {
 bool Node::isLeaf() {
     return getChildren().size() == 0;
 }
-
-    

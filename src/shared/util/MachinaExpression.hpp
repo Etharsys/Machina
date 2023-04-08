@@ -29,5 +29,16 @@ class MachinaExpression
             _values.emplace_back(value); 
         }
 
+        std::string toString() const {
+            std::string s = _key + ":";
+            std::for_each(_values.begin(), _values.end(), [&s](const std::string& value){ s = s.append(value + " "); });
+            return s;
+        }
+
         friend std::ostream& operator<<(std::ostream& os, const MachinaExpression& dt);
 };
+
+inline std::ostream& operator<<(std::ostream& os, const MachinaExpression& o) {
+    os << o.toString();
+    return os;
+}

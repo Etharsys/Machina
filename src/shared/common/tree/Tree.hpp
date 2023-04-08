@@ -44,10 +44,6 @@ class Tree {
       std::shared_ptr<Node> _root;
       std::shared_ptr<Node> _currentNode;
 
-      void displayNode(Node node);
-
-      void displayTree(Node node);
-
   public:
       Tree();
 
@@ -65,7 +61,5 @@ class Tree {
 
       void addAndMoveToChild(std::string key, std::vector<std::string> keyValues);
       
-      void display(Node node);
-
-      friend std::ostream& operator<<(std::ostream& os, const std::vector<std::string>& keyValues);
+      void display();
 };

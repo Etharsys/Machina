@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include "vector_util.hpp"
+
 #include "SyntacticParser.hpp"
 #include "SyntacticParserException.hpp"
 
@@ -39,6 +41,7 @@ void SyntacticParser::parseArgument(string currentLine) {
             throw SyntacticParserException("Unexpected behaviour occured");
             break;
     }
+    log("Machina expression with key : '" + expression.getKey() + "' has been added with value : '" + toString(expression.getValues()) + "'");
     _expressions.emplace_back(expression);
 }
 
