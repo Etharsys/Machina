@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "MachinaExpression.hpp"
 
@@ -9,7 +10,7 @@ class SyntacticParser {
 
     private:
         std::vector<MachinaExpression> _expressions {};
-        std::vector<std::string> _lines;
+        std::vector<std::pair<int, std::string>> _lines;
 
         /**
          * @brief split a line with according to a delimiter
@@ -29,7 +30,7 @@ class SyntacticParser {
          * 
          * @throw SyntacticParserException if there is no argument
          */
-        void parseArgument(std::string currentLine);
+        void parseArgument(std::pair<int, std::string> currentLine);
 
     public:
 
@@ -38,7 +39,7 @@ class SyntacticParser {
          * 
          * @param lines list of lines (readed by the file reader)
          */
-        SyntacticParser(const std::vector<std::string>& lines);
+          SyntacticParser(const std::vector<std::pair<int, std::string>>& lines);
 
         /**
          * @brief process the parsing

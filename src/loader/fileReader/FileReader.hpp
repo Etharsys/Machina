@@ -5,6 +5,7 @@
 #include <fstream>
 #include <optional>
 #include <vector>
+#include <utility>
 
 #include "logger.hpp"
 #include "project_config.hpp"
@@ -70,5 +71,5 @@ class FileReader {
          * 
          * @throw ReaderException if the file is not opened
          */
-        std::vector<std::string> read();
+        std::vector<std::pair<int, std::string>> read();
 };
