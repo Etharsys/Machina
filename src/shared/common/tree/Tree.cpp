@@ -1,6 +1,7 @@
 #include "Tree.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 #include "logger.hpp"
 
